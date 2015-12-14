@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>^dl</title>
+
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">^dl</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Downloads</a></li>
+                <li><a href="#add" data-toggle="modal" data-target="#addDialog">Add</a></li>
+                <li><a href="#finished">Finished</a></li>
+                <li><a href="#conf" data-toggle="modal" data-target="#configDialog">Configuration</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+<br/><br/><br/>
+<div class="container-fluid">
+    <div class="table-responsive col-lg-10">
+        <table class="table table-striped" id="downloadsTable">
+            <thead>
+            <tr>
+                <th class="col-lg-5">Name</th>
+                <th class="col-lg-2">Progress</th>
+                <th class="col-lg-2">Est.&nbsp;time</th>
+                <th class="col-lg-2">Size</th>
+                <th class="col-lg-2">Speed</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-lg-2 sidebar" id="action-requests">
+        <div class="sidebar-module">
+            <div class="thumbnail">
+                <img src="captcha.gif" width="100" height="30" border="0"/>
+                <div class="caption">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Enter value"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Submit</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-module">
+            <div class="thumbnail">
+                <img src="captcha.gif" width="100" height="30" border="0"/>
+                <div class="caption">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Enter value"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Submit</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add new downloads</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addLinks">Links:</label>
+                    <textarea class="form-control" rows="8" id="addLinks"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" id="addStart">Start</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Add paused</a></li>
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+<div id="configDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Bridges configuration</h4>
+            </div>
+            <div class="modal-body">
+                <div id="sidebar-wrapper">
+                <div class="sidebar-nav list-group">
+                    <button type="button" class="list-group-item">FreeRapidDownloader</button>
+                    <button type="button" class="list-group-item">JDownloader</button>
+                    <button type="button" class="list-group-item">TTorrent</button>
+                    <button type="button" class="list-group-item">Raw</button>
+                </div>
+                </div>
+                <div id="content-wrapper">
+                    <div class="container-fluid">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="jquery-2.1.4.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="dl.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath*:/spring/*.xml" />
+
+    <bean name="bridgeService" class="cz.activecode.dl.services.BridgeServiceImpl" init-method="init">
+    </bean>
+
+    <bean name="downloadsService" class="cz.activecode.dl.services.DownloadServiceImpl" init-method="init" destroy-method="destroy">
+        <property name="bridgeService" ref="bridgeService"/>
+    </bean>
+
+    <bean name="downloads" class="cz.activecode.dl.rest.Downloads">
+        <property name="downloadsService" ref="downloadsService"/>
+    </bean>
+</beans>
