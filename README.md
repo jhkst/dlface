@@ -5,6 +5,12 @@
 It lays on *server side* and publishes simple *REST api* to manipulate with downloads.
 There is also a simple built-in web interface which uses this *REST api*.
 
+## Browser screenshots
+![Add Download](https://cloud.githubusercontent.com/assets/7606266/22400299/33ed48e4-e5b1-11e6-92de-cb1101f5eca6.png)
+![Downloads List](https://cloud.githubusercontent.com/assets/7606266/22400300/3696e03c-e5b1-11e6-9b77-fe61f5174879.png)
+![Download Detail 1](https://cloud.githubusercontent.com/assets/7606266/22400301/3aee3a04-e5b1-11e6-8312-12551235944a.png)
+![Download Detail 2](https://cloud.githubusercontent.com/assets/7606266/22400302/3c857e7c-e5b1-11e6-9835-a105b3dcf8e0.png)
+
 ## Build requirements
 - Java 8
 - Maven 2 (maybe also 3?)
