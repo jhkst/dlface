@@ -1,11 +1,20 @@
 package cz.activecode.dl.ibridge;
 
-import cz.activecode.dl.templater.TemplatedBean;
-
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 
-public class DownloadStatus extends TemplatedBean {
+
+/**
+ * Generic donwload status TO exported to REST.
+ * This TO is updated by bridge.
+ * Use method {@link #start()} before downloading and {@link #end()} after download finises.
+ * These methods are used to count download time.
+ * Inherit this class to add more status information.
+ */
+@XmlRootElement
+public class DownloadStatus {
 
     private DlId dlId;
     private String name;
@@ -16,12 +25,16 @@ public class DownloadStatus extends TemplatedBean {
     private volatile long totalSize;
     private volatile long downloadedSize;
 
-    private long startTime;
-    private long finishTime;
+    private long timerStartNano;
+    private long timerEndNano;
 
     private volatile double speed;
-    private volatile long estTime;
+    private volatile long estTimeNano;
+
     private volatile float progress;
+
+    private Date startTime;
+    private Date endTime;
 
     public DlId getDlId() {
         return dlId;
@@ -71,28 +84,28 @@ public class DownloadStatus extends TemplatedBean {
         this.downloadedSize = downloadedSize;
     }
 
-    public long getStartTime() {
-        return startTime;
+    public long getTimerStart() {
+        return timerStartNano / 1_000_000_000L;
     }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    public void setTimerStart(long timerStart) {
+        this.timerStartNano = timerStart * 1_000_000_000L;
     }
 
-    public void setStartTimeNano(long startTimeNano) {
-        this.startTime = startTimeNano / 1_000_000_000L;
+    public void setTimerStartNano(long timerStartNano) {
+        this.timerStartNano = timerStartNano;
     }
 
-    public long getFinishTime() {
-        return finishTime;
+    public long getTimerEnd() {
+        return timerEndNano / 1_000_000_000;
     }
 
-    public void setFinishTime(long finishTime) {
-        this.finishTime = finishTime;
+    public void setTimerEnd(long timerEnd) {
+        this.timerEndNano = timerEnd * 1_000_000_000L;
     }
 
-    public void setFinishTimeNano(long finishTimeNano) {
-        this.finishTime = finishTimeNano / 1_000_000_000L;
+    public void setTimerEndNano(long timerEndNano) {
+        this.timerEndNano = timerEndNano;
     }
 
     public double getSpeed() {
@@ -108,15 +121,15 @@ public class DownloadStatus extends TemplatedBean {
     }
 
     public long getEstTime() {
-        return estTime;
+        return estTimeNano / 1_000_000_000L;
     }
 
     public void setEstTime(long estTime) {
-        this.estTime = estTime;
+        this.estTimeNano = estTime * 1_000_000_000L;
     }
 
     public void setEstTimeNano(long estTimeNano) {
-        this.estTime = estTimeNano / 1_000_000_000L;
+        this.estTimeNano = estTimeNano;
     }
 
     public float getProgress() {
@@ -125,5 +138,53 @@ public class DownloadStatus extends TemplatedBean {
 
     public void setProgress(float progress) {
         this.progress = progress;
+    }
+
+    /**
+     * Computes estimation time from start time, actual time, total and downloaded bytes
+     * @param startTime start time
+     * @param now actual time
+     * @param downloaded actually downloaded bytes
+     * @param total total bytes of downloaded file
+     * @return time to finish download
+     */
+    public static long computeEstTime(long startTime, long now, long downloaded, long total) {
+        return  (long) (((double)total - downloaded)/downloaded * (now - startTime));
+    }
+
+    /**
+     * Start download time couter.
+     */
+    public void start() {
+        this.timerStartNano = System.nanoTime();
+        this.startTime = new Date();
+    }
+
+    /**
+     * End download time counter.
+     */
+    public void end() {
+        this.timerEndNano = System.nanoTime();
+        this.endTime = new Date();
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = new Date(startTime);
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = new Date(endTime);
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public long timerStartNano() {
+        return timerStartNano;
     }
 }

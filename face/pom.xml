@@ -2,21 +2,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <groupId>cz.activecode.dl</groupId>
         <artifactId>dl</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>face</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
+    <scm>
+        <connection>scm:git:file://</connection>
+    </scm>
+
     <properties>
-        <spring.version>4.2.3.RELEASE</spring.version>
-        <jersey.version>1.19</jersey.version>
+        <jersey.version>1.19.3</jersey.version>
+        <tomcat.url></tomcat.url>
+        <tomcat.server></tomcat.server>
     </properties>
 
     <dependencies>
@@ -24,11 +31,59 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <version>${spring.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
             <version>${jersey.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-context</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-beans</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-web</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -36,41 +91,97 @@
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0.1</version>
+            <version>2.1-m02</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.0-b01</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <!-- webjars -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery</artifactId>
+            <version>3.1.1-1</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
+            <!-- version 2.x.x kept because of bootstrap 3.x.x dependency -->
         </dependency>
         <dependency>
-            <groupId>cz.activecode.dl</groupId>
-            <artifactId>ibridge</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>3.3.7-1</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
+            <!-- version 4.x.x need lot of changes in javascript code -->
         </dependency>
         <dependency>
-            <groupId>cz.activecode.dl</groupId>
-            <artifactId>templater</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.webjars</groupId>
+            <artifactId>datatables</artifactId>
+            <version>1.10.13</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>cz.activecode.dl</groupId>
-            <artifactId>rawbridge</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.webjars</groupId>
+            <artifactId>momentjs</artifactId>
+            <version>2.17.1</version><!-- don't forget to update version in index.html -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>datatables.net-buttons</artifactId>
+            <version>1.2.4</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>cz.activecode.dl</groupId>
-            <artifactId>torrentbridge</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>datatables.net-buttons-bs</artifactId>
+            <version>1.2.4</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>datatables.net-select</artifactId>
+            <version>1.2.0</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>datatables.net-select-bs</artifactId>
+            <version>1.2.0</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>bootbox</artifactId>
+            <version>4.4.0</version><!-- don't forget to update version in index.html -->
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <dependency>
             <groupId>cz.activecode.dl</groupId>
-            <artifactId>frdbridge</artifactId>
+            <artifactId>face-services</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
 
     <build>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <filtering>true</filtering><!-- writes properties to placeholders -->
             </resource>
             <resource>
                 <directory>src/main/java</directory>
@@ -82,10 +193,69 @@
 
         <plugins>
             <plugin>
+                <groupId>com.cj.jshintmojo</groupId>
+                <artifactId>jshint-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>lint</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <options>indent,camelcase,eqeqeq,forin,immed,noarg,noempty,nonew</options>
+                    <directories>
+                        <directory>src/main/webapp</directory>
+                    </directories>
+                    <reporter>jslint</reporter>
+                    <reportFile>target/jshint.xml</reportFile>
+                    <failOnError>true</failOnError>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.3.6.v20151106</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <url>${tomcat.url}</url>
+                    <server>${tomcat.server}</server>
+                    <path>/dlface</path>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                    <archiveClasses>true</archiveClasses>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>

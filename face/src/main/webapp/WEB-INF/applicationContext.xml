@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   					   http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
 
     <import resource="classpath*:/spring/*.xml" />
 
-    <bean name="bridgeService" class="cz.activecode.dl.services.BridgeServiceImpl" init-method="init">
+    <bean name="globalConfig" class="cz.activecode.dl.GlobalConfigImpl" init-method="init">
     </bean>
 
-    <bean name="downloadsService" class="cz.activecode.dl.services.DownloadServiceImpl" init-method="init" destroy-method="destroy">
-        <property name="bridgeService" ref="bridgeService"/>
-    </bean>
-
-    <bean name="downloads" class="cz.activecode.dl.rest.Downloads">
+    <!-- REST -->
+    <bean name="downloads" class="cz.activecode.dl.rest.v1.Downloads">
         <property name="downloadsService" ref="downloadsService"/>
+        <property name="globalConfig" ref="globalConfig"/>
     </bean>
+
+    <bean name="actionRequests" class="cz.activecode.dl.rest.v1.ActionRequests">
+        <property name="actionService" ref="actionService"/>
+    </bean>
+
+    <bean name="alerts" class="cz.activecode.dl.rest.v1.Alerts">
+        <property name="alertMessageService" ref="alertMessageService"/>
+    </bean>
+
+    <bean name="systemInfo" class="cz.activecode.dl.rest.v1.SystemInfo" init-method="init">
+        <property name="globalConfig" ref="globalConfig"/>
+    </bean>
+
 </beans>

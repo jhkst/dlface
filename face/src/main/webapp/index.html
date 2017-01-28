@@ -4,11 +4,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>^dl</title>
 
-    <!-- Bootstrap -->
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <title>^dl &#x1F60E;</title>
+
+    <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAEklEQVQ4y2NgGAWjYBSMAggAAAQQAAGFP6pyAAAAAElFTkSuQmCC">
+    <link rel='stylesheet' href='webjars/bootstrap/3.3.7-1/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='webjars/datatables/1.10.13/css/jquery.dataTables.min.css'>
+    <link rel='stylesheet' href='webjars/datatables.net-buttons-bs/1.2.4/css/buttons.bootstrap.min.css'>
+    <link rel='stylesheet' href='webjars/datatables.net-select-bs/1.2.0/css/select.bootstrap.min.css'>
+
+    <link href="dl.css" rel="stylesheet">
 
 </head>
 <body>
@@ -22,68 +27,67 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">^dl</a>
+            <a class="navbar-brand" href="#">^dl &#x1F60E;</a>
+
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Downloads</a></li>
+                <li class="active"><a href="#downloadsTab" data-toggle="tab">Downloads</a></li>
+                <li><a href="#finishedDownloadsTab" data-toggle="tab">Finished</a></li>
                 <li><a href="#add" data-toggle="modal" data-target="#addDialog">Add</a></li>
-                <li><a href="#finished">Finished</a></li>
-                <li><a href="#conf" data-toggle="modal" data-target="#configDialog">Configuration</a></li>
             </ul>
-        </div><!--/.nav-collapse -->
+        </div>
     </div>
 </nav>
 <br/><br/><br/>
-<div class="container-fluid">
-    <div class="table-responsive col-lg-10">
-        <table class="table table-striped" id="downloadsTable">
-            <thead>
-            <tr>
-                <th class="col-lg-5">Name</th>
-                <th class="col-lg-2">Progress</th>
-                <th class="col-lg-2">Est.&nbsp;time</th>
-                <th class="col-lg-2">Size</th>
-                <th class="col-lg-2">Speed</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    <div class="col-lg-2 sidebar" id="action-requests">
-        <div class="sidebar-module">
-            <div class="thumbnail">
-                <img src="captcha.gif" width="100" height="30" border="0"/>
-                <div class="caption">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Enter value"/>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button">Submit</button>
-                        </span>
-                    </div>
-                </div>
+<div class="container-fluid" id="alerts">
+</div>
+<div class="tab-content">
+    <div id="downloadsTab" class="tab-pane in active">
+        <div class="container-fluid">
+            <div class="table-responsive col-lg-10">
+                <table class="table table-striped table-bordered dataTable no-footer" id="downloadsTable">
+                    <thead>
+                    <tr>
+                        <th class="col-lg-5 sorting" aria-controls="downloadsTable">Name</th>
+                        <th class="col-lg-2 sorting" aria-controls="downloadsTable">Progress</th>
+                        <th class="col-lg-2 sorting" aria-controls="downloadsTable">Est.&nbsp;time</th>
+                        <th class="col-lg-2 sorting" aria-controls="downloadsTable">Size</th>
+                        <th class="col-lg-2 sorting" aria-controls="downloadsTable">Speed</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="sidebar-module">
-            <div class="thumbnail">
-                <img src="captcha.gif" width="100" height="30" border="0"/>
-                <div class="caption">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Enter value"/>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button">Submit</button>
-                        </span>
-                    </div>
-                </div>
+            <div class="col-lg-2 sidebar" id="action-requests">
             </div>
         </div>
     </div>
+
+    <div id="finishedDownloadsTab" class="tab-pane in">
+        <div class="container-fluid">
+            <div class="table-responsive col-lg-10">
+                <table class="table table-striped table-bordered dataTable no-footer" id="finishedDownloadsTable">
+                    <thead>
+                    <tr>
+                        <th class="col-lg-5 sorting" aria-controls="finishedDownloadsTable">Name</th>
+                        <th class="col-lg-2 sorting" aria-controls="finishedDownloadsTable">Size</th>
+                        <th class="col-lg-2 sorting" aria-controls="finishedDownloadsTable">Start time</th>
+                        <th class="col-lg-2 sorting" aria-controls="finishedDownloadsTable">End time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <div id="addDialog" class="modal fade" role="dialog">
     <div class="modal-dialog">
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -91,62 +95,80 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="addLinks">Links:</label>
-                    <textarea class="form-control" rows="8" id="addLinks"></textarea>
+                    <label for="addLinks">Add links or drop files:</label>
+                    <div id="drop-zone">
+                        <textarea class="form-control" rows="8" id="addLinks"></textarea>
+                    </div>
+                </div>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <input type="file" name="files[]" id="js-upload-files" multiple="multiple">
+                    </div>
+                </div>
+                <div id="upload-info-box">
+                    <span id="upload-info"></span>
+                    <button type="button" class="btn btn-default btn-xs pull-right" id="remove-uploads">Remove</button>
                 </div>
             </div>
             <div class="modal-footer">
                 <div class="btn-group">
                     <button type="button" class="btn btn-default" id="addStart">Start</button>
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Add paused</a></li>
-                    </ul>
                 </div>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
 
     </div>
-    </div>
+</div>
 
-<div id="configDialog" class="modal fade" role="dialog">
+<div id="detailDialog" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Bridges configuration</h4>
+                <h4 class="modal-title">Download details</h4>
             </div>
             <div class="modal-body">
-                <div id="sidebar-wrapper">
-                <div class="sidebar-nav list-group">
-                    <button type="button" class="list-group-item">FreeRapidDownloader</button>
-                    <button type="button" class="list-group-item">JDownloader</button>
-                    <button type="button" class="list-group-item">TTorrent</button>
-                    <button type="button" class="list-group-item">Raw</button>
-                </div>
-                </div>
-                <div id="content-wrapper">
-                    <div class="container-fluid">
-                        &nbsp;
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default">Save</button>
+                <!--<div id="downloadDetail" class="container-fluid">-->
+                <!--</div>-->
+                <table class="table table-striped table-bordered dataTable no-footer" id="downloadDetailTable">
+                    <thead>
+                    <tr>
+                        <th class="col-lg-1 sorting" aria-controls="downloadDetailTable">Property</th>
+                        <th class="col-lg-3 sorting" aria-controls="downloadDetailTable">Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="jquery-2.1.4.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="bootstrap/js/bootstrap.min.js"></script>
+<div class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container text-center">
+        <p class="muted credit">dlFace&nbsp;v.<span id="appVersion"></span> | Up&nbsp;Time:&nbsp;<span id="upTime">N/A</span> | Free&nbsp;space:&nbsp;<span id="freeSpace">N/A</span> |
+            Memory&nbsp;(M/T/U):&nbsp;<span id="maxMem"></span>/<span id="totalMem"></span>/<span id="usedMem"></span> |
+            Threads:&nbsp;<span id="threadCnt"></span>(<span id="lockedThreadCnt"></span>) | Load:&nbsp;<span id="systemLoad"></span>
+        </p>
+    </div>
+</div>
 
-    <script src="dl.js"></script>
+
+<script src="webjars/jquery/3.1.1-1/jquery.js"></script>
+<script src="webjars/bootstrap/3.3.7-1/js/bootstrap.js"></script>
+<script src="webjars/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
+
+<script src="webjars/datatables.net-select/1.2.0/js/dataTables.select.min.js"></script>
+<script src="webjars/datatables.net-buttons/1.2.4/js/dataTables.buttons.min.js"></script>
+<script src="webjars/datatables.net-buttons-bs/1.2.4/js/buttons.bootstrap.min.js"></script>
+<script src="webjars/bootbox/4.4.0/bootbox.js"></script>
+<script src="webjars/momentjs/2.17.1/min/moment.min.js"></script>
+
+
+<script src="dl-core.js"></script>
+<script src="dl-actions.js"></script>
+<script src="dl.js"></script>
 </body>
 </html>

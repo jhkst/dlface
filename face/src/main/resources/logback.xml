@@ -1,4 +1,9 @@
-<configuration><!--debug="true"-->
+<configuration debug="true">
+    <!-- for jul-to-slf4j -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -7,7 +12,9 @@
 
     <logger name="cz.activecode.dl" level="DEBUG"/>
 
-    <logger name="com.turn.ttorrent" level="ERROR"/><!-- todo: move to torrentbridge ? -->
+    <logger name="com.turn.ttorrent" level="ERROR"/>
+
+    <logger name="org.java.plugin" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

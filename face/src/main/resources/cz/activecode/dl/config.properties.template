@@ -1,0 +1,15 @@
+# This is default configuration property file for dlFace
+
+# This is folder where will be targeted all downloads
+dlface.downloads.targetPath=/tmp
+
+# Order of bridges for auomatical choose (eg. torrentBridge can handle torrent files before rawBridge)
+dlface.bridges.order=frdBridge,torrentBridge,rawBridge
+
+# Threshold for free space on target folder. There is REST warning in case of low free space.
+# Use T,Ti,G,Gi,K,Ki,B for shorten the value (it's little bit smart, so values like 2,2G,2Gi,2GiB,2gib are all accepted)
+dlface.freeSpaceThreshold=2GiB
+
+# Proxy server configuration for all downloads
+# dlface.connection.proxyHost=proxy.example.com
+# dlface.connection.proxyPort=80

@@ -3,20 +3,31 @@ package cz.activecode.dl.ibridge;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * General class wrapping download ID.
+ */
 public class DlId implements Serializable {
 
     private transient static final AtomicInteger DLID_GEN = new AtomicInteger();
 
-    private String id;
+    private final String id;
 
     private DlId(String id) {
         this.id = id;
     }
 
+    /**
+     * Create unique ID (currently just for running instance)
+     * @return unique ID
+     */
     public static DlId create() {
         return new DlId("dl" + DLID_GEN.getAndIncrement());
     }
 
+    /**
+     * return ID value
+     * @return
+     */
     //@JsonValue
     public String getId() {
         return id;
@@ -40,5 +51,14 @@ public class DlId implements Serializable {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    /**
+     * Parses id from string
+     * @param dlId the id in string
+     * @return the id
+     */
+    public static DlId fromString(String dlId) {
+        return new DlId(dlId);
     }
 }

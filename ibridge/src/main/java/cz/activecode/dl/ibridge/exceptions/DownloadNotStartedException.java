@@ -1,7 +1,7 @@
 package cz.activecode.dl.ibridge.exceptions;
 
 /**
- * Created by honza on 5.12.15.
+ * Exception during download initialization, or before the download itself starts.
  */
 public class DownloadNotStartedException extends Exception {
 
@@ -16,4 +16,6 @@ public class DownloadNotStartedException extends Exception {
     public DownloadNotStartedException(String message, Throwable cause) {
         super(message, cause);
     }
+
+
 }

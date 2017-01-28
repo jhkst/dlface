@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   					   http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="bridgeService" class="cz.activecode.dl.services.BridgeServiceImpl" init-method="init">
+        <property name="globalConfig" ref="globalConfig"/>
+    </bean>
+
+    <bean name="downloadsService" class="cz.activecode.dl.services.DownloadServiceImpl" init-method="init" destroy-method="destroy">
+        <property name="bridgeService" ref="bridgeService"/>
+        <property name="globalConfig" ref="globalConfig"/>
+        <property name="alertMessageService" ref="alertMessageService"/>
+    </bean>
+
+    <bean name="actionService" class="cz.activecode.dl.services.ActionServiceImpl">
+    </bean>
+
+    <bean name="alertMessageService" class="cz.activecode.dl.services.AlertMessageServiceImpl">
+    </bean>
+
+</beans>

@@ -24,3 +24,5 @@ nb-configuration.xml
 #Apple
 .DS_Store
 
+#JVM
+hs_err_pid*
