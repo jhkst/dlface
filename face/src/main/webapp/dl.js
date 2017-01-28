@@ -3,6 +3,7 @@ var messageTTL = 5 * 1000;
 var updateInterval = 1000;
 var updateFinishedDelay = 1000;
 var dropFiles = [];
+var windowFocus = true;
 
 function getFinishedDownloads() {
     $.ajax({
@@ -426,6 +427,13 @@ $(document).ready(function() {
         cleanUploads();
     });
 
+    $(window).bind('focus', function() {
+        windowFocus = true;
+    });
+    $(window).bind('blur', function() {
+        windowFocus = false;
+    });
+
     setTimeout(getFinishedDownloads, updateFinishedDelay);
     setTimeout(periodic, updateInterval);
 });
@@ -452,9 +460,11 @@ function setModalMaxHeight(element) {
 }
 
 function periodic() {
-    getDownloads();
-    getActionRequest();
-    getMessages();
-    getSystemInfo();
+    if(windowFocus) {
+        getDownloads();
+        getActionRequest();
+        getMessages();
+        getSystemInfo();
+    }
     setTimeout(periodic, updateInterval);
 }
