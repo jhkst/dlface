@@ -4,7 +4,6 @@ import cz.activecode.dl.ibridge.actions.ActionRequestData;
 import cz.activecode.dl.ibridge.actions.ActionResponseData;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Service for manipulating with actions

@@ -1,18 +1,25 @@
 package cz.activecode.dl.utils;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 
 public class IOUtil {
 
     private static final String TORRENT_HEADER = "d8:announce";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IOUtil.class);
+
+
     public enum FileType {
         TORRENT,
-        URL_LIST,
+        URL_LIST;
     }
-
     public static File uniqueFile(File path, String fileName) {
         File probed;
         String currentFilename = fileName;
@@ -39,6 +46,14 @@ public class IOUtil {
 
     public static FileType getFileType(File file) throws IOException {
         return getFileType(new FileInputStream(file));
+    }
+
+    public static void setFilePermission(File file, Set<PosixFilePermission> savePermissions) {
+        try {
+            Files.setPosixFilePermissions(file.toPath(), savePermissions);
+        } catch (UnsupportedOperationException | IOException | SecurityException e) {
+            LOGGER.warn("Cannot change file permissions for " + file , e);
+        }
     }
 
     private static byte[] readBytes(BufferedInputStream stream, int size) throws IOException {

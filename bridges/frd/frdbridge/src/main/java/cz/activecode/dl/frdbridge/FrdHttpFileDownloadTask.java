@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
 
 public class FrdHttpFileDownloadTask implements HttpFileDownloadTask, Runnable {
 
@@ -111,7 +112,7 @@ public class FrdHttpFileDownloadTask implements HttpFileDownloadTask, Runnable {
                 fileOutputStream.write(buf, 0, len);
                 counter += len;
 
-                if(suppose == 0) {
+                if (suppose == 0) {
                     suppose = downloadFile.getTotalSize();
                 }
 
@@ -128,26 +129,22 @@ public class FrdHttpFileDownloadTask implements HttpFileDownloadTask, Runnable {
                 }
             }
 
-            if (!wasInterrupted(downloadFile.getStoreFile())) {
-                if (!downloadFile.getStoreFile().renameTo(outputFile)) {
-                    LOGGER.error("Cannot rename downloaded file {} to {}", downloadFile.getStoreFile(), outputFile);
-                }
-            }
         } finally {
-            LOGGER.debug("FRD finally block started");
-            if (!wasInterrupted(downloadFile.getStoreFile())) {
-                downloadFile.setDownloaded(downloadFile.getRealDownload());
-            } else {
-                LOGGER.info("Deleting partial file {}", storeFile);
-                if (!storeFile.delete()) {
-                    LOGGER.error("Deleting partial file failed ({})", storeFile);
+            try {
+                if (!wasInterrupted(storeFile)) {
+                    downloadFile.setDownloaded(downloadFile.getRealDownload());
+                    Files.move(storeFile.toPath(), outputFile.toPath());
+                } else {
+                    LOGGER.info("Deleting partial file {}", storeFile);
+                    Files.delete(storeFile.toPath());
                 }
+            } catch (IOException e) {
+                LOGGER.error("Cannot operate with temporary file {}", storeFile, e);
             }
             if (downloadFile.getState() == DownloadState.CANCELLED) {
                 downloadFile.setDownloaded(0);
             }
             downloadFile.end();
-            LOGGER.debug("FRD finishing status updaters");
         }
 
     }
@@ -209,5 +206,10 @@ public class FrdHttpFileDownloadTask implements HttpFileDownloadTask, Runnable {
             ++counter;
         }
         return newFile.getName();
+    }
+
+    @Override
+    public void saveToHistoryList(File savedAs) {
+        LOGGER.debug("saveToHistoryList not implemented");
     }
 }

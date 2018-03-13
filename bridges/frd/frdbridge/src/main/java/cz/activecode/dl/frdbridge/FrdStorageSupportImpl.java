@@ -48,6 +48,12 @@ public class FrdStorageSupportImpl implements ConfigurationStorageSupport {
         return file.isFile() && file.exists();
     }
 
+    @Override
+    public File getConfigDirectory() {
+        LOGGER.debug("getConfigDirectory not implemented");
+        return null;
+    }
+
     private File getFileForFilename(String filename) {
         return new File(filename);
     }

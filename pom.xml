@@ -11,9 +11,25 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <slf4j.version>1.7.22</slf4j.version>
-        <logback.version>1.1.8</logback.version>
-        <spring.version>4.3.5.RELEASE</spring.version>
+
+        <slf4j.version>1.7.25</slf4j.version>
+        <logback.version>1.2.3</logback.version>
+        <spring.version>4.3.14.RELEASE</spring.version>
+        <jetty.version>9.4.8.v20171121</jetty.version>
+        <jersey.version>1.19.4</jersey.version>
+
+        <bootstrap.version>3.3.7-1</bootstrap.version>
+        <datatables.version>1.10.16</datatables.version>
+        <jquery.version>3.3.1-1</jquery.version>
+        <datatables.buttons.version>1.4.2</datatables.buttons.version>
+        <datatables.select.version>1.2.3</datatables.select.version>
+        <bootbox.version>4.4.0</bootbox.version>
+        <momentjs.version>2.20.1</momentjs.version>
+        <onsenui.version>2.9.2</onsenui.version>
+
+        <maven.build.timestamp.format>yyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <timestamp>${maven.build.timestamp}</timestamp>
+
     </properties>
 
     <modules>
@@ -25,6 +41,7 @@
         <module>bridges/torrent/torrentbridge</module>
         <module>bridges/frd/frdbridge</module>
         <module>bridges/frd/frdlegacy</module>
+        <module>embedded</module>
     </modules>
 
     <dependencies>

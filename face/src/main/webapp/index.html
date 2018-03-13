@@ -5,13 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>^dl &#x1F60E;</title>
+    <title>dlFace</title>
 
-    <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAEklEQVQ4y2NgGAWjYBSMAggAAAQQAAGFP6pyAAAAAElFTkSuQmCC">
-    <link rel='stylesheet' href='webjars/bootstrap/3.3.7-1/css/bootstrap.min.css'>
-    <link rel='stylesheet' href='webjars/datatables/1.10.13/css/jquery.dataTables.min.css'>
-    <link rel='stylesheet' href='webjars/datatables.net-buttons-bs/1.2.4/css/buttons.bootstrap.min.css'>
-    <link rel='stylesheet' href='webjars/datatables.net-select-bs/1.2.0/css/select.bootstrap.min.css'>
+    <link rel="shortcut icon" type="image/png">
+    <link rel='stylesheet' href='webjars/bootstrap/${bootstrap.version}/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='webjars/datatables/${datatables.version}/css/jquery.dataTables.min.css'>
+    <link rel='stylesheet' href='webjars/datatables.net-buttons-bs/${datatables.buttons.version}/css/buttons.bootstrap.min.css'>
+    <link rel='stylesheet' href='webjars/datatables.net-select-bs/${datatables.select.version}/css/select.bootstrap.min.css'>
 
     <link href="dl.css" rel="stylesheet">
 
@@ -27,7 +27,9 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">^dl &#x1F60E;</a>
+            <span class="navbar-brand" style="margin-top: -5px;">
+                <img src="logo.svg" style="-webkit-filter: invert(100%); filter: invert(100%);" width="30" height="30" title="dlface">
+            </span>
 
         </div>
         <div id="navbar" class="collapse navbar-collapse">
@@ -148,23 +150,24 @@
 
 <div class="navbar navbar-default navbar-fixed-bottom">
     <div class="container text-center">
-        <p class="muted credit">dlFace&nbsp;v.<span id="appVersion"></span> | Up&nbsp;Time:&nbsp;<span id="upTime">N/A</span> | Free&nbsp;space:&nbsp;<span id="freeSpace">N/A</span> |
-            Memory&nbsp;(M/T/U):&nbsp;<span id="maxMem"></span>/<span id="totalMem"></span>/<span id="usedMem"></span> |
-            Threads:&nbsp;<span id="threadCnt"></span>(<span id="lockedThreadCnt"></span>) | Load:&nbsp;<span id="systemLoad"></span>
+        <p class="muted credit"><a href="https://github.com/jhkst/dlface" target="_blank">dlFace</a>&nbsp;v.<span id="appVersion"></span> | Up&nbsp;Time:&nbsp;<span id="upTime">N/A</span> | Free&nbsp;space:&nbsp;<span id="freeSpace">N/A</span> |
+            Memory&nbsp;<span title="Max/Total/Used">(M/T/U)</span>:&nbsp;<span id="maxMem"></span>/<span id="totalMem"></span>/<span id="usedMem"></span> |
+            <span title="total (locked)">Threads:</span>&nbsp;<span id="threadCnt"></span>(<span id="lockedThreadCnt"></span>) | Load:&nbsp;<span id="systemLoad"></span> |
+            <a href="index-m.html">&#x1f4f1;</a>
         </p>
     </div>
 </div>
 
 
-<script src="webjars/jquery/3.1.1-1/jquery.js"></script>
-<script src="webjars/bootstrap/3.3.7-1/js/bootstrap.js"></script>
-<script src="webjars/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="webjars/jquery/${jquery.version}/jquery.js"></script>
+<script src="webjars/bootstrap/${bootstrap.version}/js/bootstrap.js"></script>
+<script src="webjars/datatables/${datatables.version}/js/jquery.dataTables.min.js"></script>
 
-<script src="webjars/datatables.net-select/1.2.0/js/dataTables.select.min.js"></script>
-<script src="webjars/datatables.net-buttons/1.2.4/js/dataTables.buttons.min.js"></script>
-<script src="webjars/datatables.net-buttons-bs/1.2.4/js/buttons.bootstrap.min.js"></script>
-<script src="webjars/bootbox/4.4.0/bootbox.js"></script>
-<script src="webjars/momentjs/2.17.1/min/moment.min.js"></script>
+<script src="webjars/datatables.net-select/${datatables.select.version}/js/dataTables.select.min.js"></script>
+<script src="webjars/datatables.net-buttons/${datatables.buttons.version}/js/dataTables.buttons.min.js"></script>
+<script src="webjars/datatables.net-buttons-bs/${datatables.buttons.version}/js/buttons.bootstrap.min.js"></script>
+<script src="webjars/bootbox/${bootbox.version}/bootbox.js"></script>
+<script src="webjars/momentjs/${momentjs.version}/min/moment.min.js"></script>
 
 
 <script src="dl-core.js"></script>

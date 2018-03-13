@@ -1,12 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true">
+
+    <property scope="context" name="COLORIZER_COLORS" value="boldred@white,yellow@black,green@,blue@,cyan@" />
+    <conversionRule conversionWord="colorize" converterClass="org.tuxdude.logback.extensions.LogColorizer" />
+
     <!-- for jul-to-slf4j -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%gray(%thread)] %highlight(%-5level) %cyan(%logger{36}) - %colorize(%msg) %n</pattern>
         </encoder>
     </appender>
 

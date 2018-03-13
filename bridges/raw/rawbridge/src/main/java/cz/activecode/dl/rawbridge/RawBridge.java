@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,7 +51,7 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
     }
 
     @Override
-    public DownloadFuture addDownload(String urlStr, File saveToPath) throws DownloadNotStartedException {
+    public DownloadFuture addDownload(String urlStr, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         URL url;
         RawDownloadStatus downloadStatus = new RawDownloadStatus();
         downloadStatus.setOriginalUrl(urlStr);
@@ -62,22 +63,35 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
             throw new DownloadNotStartedException(e);
         }
 
+        switch (url.getProtocol()) {
+            case "http":
+            case "https":
+            case "ftp":
+                break;
+            default:
+                LOGGER.warn("Used protocol ''{}'' forbidden. Download not start", url.getProtocol());
+                throw new DownloadNotStartedException("Forbidden protocol '" + url.getProtocol() + "'");
+
+        }
+
         Future future = executorService.submit(() -> {
             LOGGER.info("Download initialization");
-            HttpURLConnection httpConnection;
+
             String fileName;
             long contentLength;
             InputStream is;
             try {
+                URLConnection connection;
                 if (globalConfig.getProxy() == null) {
-                    httpConnection = (HttpURLConnection) url.openConnection();
+                    connection = url.openConnection();
                 } else {
-                    httpConnection = (HttpURLConnection) url.openConnection(globalConfig.getProxy());
+                    connection = url.openConnection(globalConfig.getProxy());
                 }
-                String contentDisposition = httpConnection.getHeaderField("Content-Disposition");
+
+                String contentDisposition = connection.getHeaderField("Content-Disposition");
                 fileName = parseContentDisposition(contentDisposition);
-                contentLength = getContentLength(httpConnection);
-                is = httpConnection.getInputStream();
+                contentLength = getContentLength(connection);
+                is = connection.getInputStream();
             } catch (IOException e) {
                 LOGGER.error("Cannot connect to " + url, e);
                 return;
@@ -97,13 +111,14 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
             downloadStatus.setTotalSize(contentLength);
             downloadStatus.setDlId(dlId);
 
+            LOGGER.info("Started download of {} into {}", url, fileName);
             try (FileOutputStream fos = new FileOutputStream(file);
                  BufferedInputStream in = new BufferedInputStream(is);
                  BufferedOutputStream bout = new BufferedOutputStream(fos, BUFFER)
             ) {
                 byte[] data = new byte[BUFFER];
                 long downloadedBytes = 0;
-                int curDow = 0;
+                int curDow;
                 downloadStatus.start();
                 long timerStart = downloadStatus.timerStartNano();
                 long lastTime = timerStart;
@@ -114,12 +129,16 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
                     bout.write(data, 0, curDow);
                     long now = System.nanoTime();
                     downloadStatus.setEstTimeNano(DownloadStatus.computeEstTime(timerStart, now, downloadedBytes, contentLength));
-                    downloadStatus.setSpeedNano(curDow / (double) (now - lastTime));
+                    if(now - lastTime > 1_000_000_000L) {
+                        downloadStatus.setSpeedNano(curDow / (double) (now - lastTime));
+                    }
                     downloadStatus.setProgress(downloadedBytes * 100f / contentLength);
                     RawBridge.this.notifyDownloadStatusUpdaters(downloadStatus);
                     lastTime = now;
                 }
                 downloadStatus.end();
+                postProcess.postProcess(downloadStatus.getFiles());
+                LOGGER.info("Download of {} finished", url);
             } catch (IOException e) {
                 LOGGER.error("Cannot download file " + file + " from " + url);
             } finally {
@@ -142,33 +161,29 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
     }
 
     @Override
-    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath) throws DownloadNotStartedException {
+    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         throw new DownloadNotStartedException(new UnsupportedOperationException("RAW does not support uploaded files"));
     }
 
     private static long tryGetFileSize(URL url) {
-        HttpURLConnection conn = null;
+        URLConnection conn;
         try {
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("HEAD");
-            conn.getInputStream();
-            return getContentLength(conn);
+            conn = url.openConnection();
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection) conn).setRequestMethod("HEAD");
+                try(InputStream is = conn.getInputStream()) {
+                    return getContentLength(conn);
+                }
+            } else {
+                return -1;
+            }
         } catch (IOException e) {
             return -1;
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
         }
     }
 
-    private static long getContentLength(HttpURLConnection httpConnection) {
-        String contentLengthField = httpConnection.getHeaderField("Content-Length");
-        try {
-            return contentLengthField == null ? -1 : Long.parseLong(contentLengthField);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+    private static long getContentLength(URLConnection connection) {
+        return connection.getContentLengthLong();
     }
 
     private static String parseUrlFileName(URL url) {

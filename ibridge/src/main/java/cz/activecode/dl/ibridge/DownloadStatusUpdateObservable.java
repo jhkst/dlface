@@ -9,7 +9,7 @@ public interface DownloadStatusUpdateObservable {
     /**
      * Adds new download. This is ususally called by the core application and is not needed
      * to be used by the bridge.
-     * @todo check if this is necessary in this interface (method not used by bridges)
+     * TODO: check if this is necessary in this interface (method not used by bridges)
      * @param downloadStatusUpdateCallback the callback which manages updating the download status
      */
     void addDownloadStatusUpdater(DownloadStatusUpdateCallback downloadStatusUpdateCallback);

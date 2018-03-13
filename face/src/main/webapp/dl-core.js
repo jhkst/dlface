@@ -193,5 +193,28 @@ var Util = {
         }
 
         return 'Uncaught Error. ' + jqXHR.responseText;
+    },
+    getIconBase64: function(iconBase64) {
+        return 'data:image/png;base64,' + iconBase64;
+    },
+    setFaviconBase64: function(iconBase64) {
+        var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/png';
+        link.rel = 'shortcut icon';
+        link.href = this.getIconBase64(iconBase64);
+        document.getElementsByTagName('head')[0].appendChild(link);
+    },
+    notification: function(text, iconBase64) {
+        if(window.Notification && Notification.permission === "granted") {
+            var n = new Notification('dlFace', {
+                body: text,
+                icon: this.getIconBase64(iconBase64)
+            });
+        }
+    },
+    notificationPermissionRequest: function() {
+        if(window.Notification && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
     }
 };

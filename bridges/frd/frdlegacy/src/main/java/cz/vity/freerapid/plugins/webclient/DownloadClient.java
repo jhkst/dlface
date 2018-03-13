@@ -5,6 +5,7 @@ import cz.vity.freerapid.plugins.webclient.interfaces.HttpDownloadClient;
 import cz.vity.freerapid.plugins.webclient.interfaces.HttpFile;
 import cz.vity.freerapid.plugins.webclient.utils.HttpUtils;
 import cz.vity.freerapid.plugins.webclient.utils.PlugUtils;
+import cz.vity.freerapid.utilities.LogUtils;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -93,7 +94,7 @@ public class DownloadClient implements HttpDownloadClient {
         clientParams.setSoTimeout(timeout);
         clientParams.setConnectionManagerTimeout(timeout);
         clientParams.setHttpElementCharset("UTF-8");
-        this.client.setHttpConnectionManager(new SimpleHttpConnectionManager(/*true*/));
+        this.client.setHttpConnectionManager(new SimpleHttpConnectionManager(true));
         this.client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
 
         HttpState initialState = new HttpState();
@@ -214,20 +215,23 @@ public class DownloadClient implements HttpDownloadClient {
         if (allowRedirect && isRedirect && deep < 2) {
             Header header = method.getResponseHeader("location");
             if (header != null) {
-                String newuri = header.getValue();
-                if ((newuri == null) || ("".equals(newuri))) {
-                    newuri = "/";
+                String location = header.getValue();
+                if (location == null || "".equals(location)) {
+                    location = "/";
                 }
-                if (!newuri.contains("http://"))
-                    newuri = "http://" + method.getURI().getHost() + newuri;
-
-                logger.info("Redirect target: " + newuri);
+                URI currentUri = method.getURI(); //complete URI (scheme, host, port, path)
+                URI redirectUri = new URI(location, true, method.getParams().getUriCharset());
+                if (redirectUri.isRelativeURI()) {
+                    redirectUri = new URI(currentUri, redirectUri);
+                }
+                String redirectUriStr = redirectUri.toString();
+                logger.info("Redirect target: " + redirectUriStr);
                 if (client.getParams().getBooleanParameter(DownloadClientConsts.USE_REFERER_WHEN_REDIRECT, false)) {
-                    setReferer(newuri);
+                    setReferer(redirectUriStr);
                 }
 
                 method.releaseConnection();
-                GetMethod redirect = getGetMethod(newuri);
+                GetMethod redirect = getGetMethod(redirectUriStr);
                 final InputStream inputStream = makeRequestFile(redirect, file, deep + 1, allowRedirect);
                 logger.info("Redirect: " + redirect.getStatusLine().toString());
                 return inputStream;
@@ -288,8 +292,9 @@ public class DownloadClient implements HttpDownloadClient {
         if (isStream && client.getParams().isParameterFalse(DownloadClientConsts.NO_CONTENT_LENGTH_AVAILABLE)) {
             final Header contentLength = method.getResponseHeader("Content-Length");
             if (contentLength == null) {
-                isStream = false;
                 logger.warning("No Content-Length in header");
+                file.setResumeSupported(false);
+                return method.getResponseBodyAsStream();
             } else {
 
                 final Long contentResponseLength = Long.valueOf(contentLength.getValue());
@@ -400,22 +405,23 @@ public class DownloadClient implements HttpDownloadClient {
             redirect = 1;
             Header header = method.getResponseHeader("location");
             if (header != null) {
-                String newuri = header.getValue();
-                if ((newuri == null) || ("".equals(newuri))) {
-                    newuri = "/";
+                String location = header.getValue();
+                if (location == null || "".equals(location)) {
+                    location = "/";
                 }
-                if (!newuri.matches("(?i)https?://.+")) {
-                    if (!newuri.startsWith("/")) {
-                        newuri = "/" + newuri;
-                    }
-                    newuri = method.getURI().getScheme() + "://" + method.getURI().getHost() + newuri;
+                URI currentUri = method.getURI(); //complete URI (scheme, host, port, path)
+                URI redirectUri = new URI(location, true, method.getParams().getUriCharset());
+                if (redirectUri.isRelativeURI()) {
+                    redirectUri = new URI(currentUri, redirectUri);
+                }
+                String redirectUriStr = redirectUri.toString();
+                logger.info("Redirect target: " + redirectUriStr);
+                if (client.getParams().getBooleanParameter(DownloadClientConsts.USE_REFERER_WHEN_REDIRECT, false)) {
+                    setReferer(redirectUriStr);
                 }
 
-                logger.info("Redirect target: " + newuri);
-                if (client.getParams().getBooleanParameter(DownloadClientConsts.USE_REFERER_WHEN_REDIRECT, false)) {
-                    setReferer(newuri);
-                }
-                GetMethod redirect = getGetMethod(newuri);
+                method.releaseConnection();
+                GetMethod redirect = getGetMethod(redirectUriStr);
                 final int i = makeRequest(redirect, allowRedirect);
                 logger.info("Redirect: " + redirect.getStatusLine().toString());
                 return i;
@@ -429,6 +435,9 @@ public class DownloadClient implements HttpDownloadClient {
             } else {
                 asString = "Text content type expected, but binary stream was found";
                 logger.warning(asString);
+                method.abort();
+                method.releaseConnection();
+                return statuscode;
             }
         }
 
@@ -437,35 +446,33 @@ public class DownloadClient implements HttpDownloadClient {
     }
 
     private void updateAsString(HttpMethod method) throws IOException {
-        Header hce = method.getResponseHeader("Content-Encoding");
         asString = "";
-        if (null != hce && !hce.getValue().isEmpty()) {
-            if ("gzip".equalsIgnoreCase(hce.getValue())) {
-                logger.info("Extracting GZIP");
-                asString = inflate(method.getResponseBodyAsStream());
-            } else {
-                logger.warning("Unknown Content-Encoding: " + hce.getValue());
+        InputStream stream = method.getResponseBodyAsStream();
+        if (stream != null) {
+            final Header hce = method.getResponseHeader("Content-Encoding");
+            if (hce != null && !hce.getValue().isEmpty()) {
+                if ("gzip".equalsIgnoreCase(hce.getValue())) {
+                    logger.info("Extracting GZIP");
+                    stream = new GZIPInputStream(stream);
+                } else {
+                    logger.warning("Unknown Content-Encoding: " + hce.getValue());
+                }
             }
-        } else {
-            final InputStream bodyAsStream = method.getResponseBodyAsStream();
-            if (bodyAsStream == null)
-                this.asString = "";
-            else
-                this.asString = streamToString(bodyAsStream);
+            asString = streamToString(stream);
         }
     }
 
     private String streamToString(final InputStream in) {
-        BufferedReader in2 = null;
-        StringWriter sw = new StringWriter();
-        char[] buffer = new char[4000];
+        Reader in2 = null;
+        StringBuilder sb = new StringBuilder(8192);
+        char[] buffer = new char[8192];
         try {
-            in2 = new BufferedReader(new InputStreamReader(in, getContentPageCharset()));
+            in2 = new InputStreamReader(in, getContentPageCharset());
             int x;
             while ((x = in2.read(buffer)) != -1) {
-                sw.write(buffer, 0, x);
+                sb.append(buffer, 0, x);
             }
-            return sw.toString();
+            return sb.toString();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error during reading content of page", e);
         } finally {
@@ -473,7 +480,7 @@ public class DownloadClient implements HttpDownloadClient {
                 try {
                     in2.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LogUtils.processException(logger, e);
                 }
             }
         }
@@ -538,29 +545,6 @@ public class DownloadClient implements HttpDownloadClient {
         logger.info("post parameters: \n" + builder.toString().trim());
         logger.info("query string = " + method.getQueryString());
         logger.info("=========================================");
-    }
-
-    /**
-     * Converts given GZIPed input stream into string. <br>
-     * UTF-8 encoding is used as default.<br>
-     * Shouldn't be called to file input streams.<br>
-     *
-     * @param in input stream which should be converted
-     * @return input stream as string
-     * @throws IOException when there was an error during reading from the stream
-     */
-    protected String inflate(InputStream in) throws IOException {
-        byte[] buffer = new byte[4000];
-        int b;
-        GZIPInputStream gin = new GZIPInputStream(in);
-        StringBuilder builder = new StringBuilder();
-        while (true) {
-            b = gin.read(buffer);
-            if (b == -1)
-                break;
-            builder.append(new String(buffer, 0, b, getContentPageCharset()));
-        }
-        return builder.toString();
     }
 
     protected String getContentPageCharset() {

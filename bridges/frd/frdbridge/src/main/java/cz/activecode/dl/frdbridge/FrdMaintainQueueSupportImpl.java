@@ -33,6 +33,11 @@ public class FrdMaintainQueueSupportImpl implements MaintainQueueSupport {
     }
 
     @Override
+    public boolean addLinksToQueueFromContainer(HttpFile parentFile, String childDir, List<FileInfo> infoList) {
+        return false;
+    }
+
+    @Override
     public boolean addLinkToQueueUsingPriority(HttpFile parentFile, List<URL> urlList) throws Exception {
         LOGGER.info("addLinkToQueueUsingPriority{{}, {})", parentFile, urlList);
         return false;
@@ -47,6 +52,18 @@ public class FrdMaintainQueueSupportImpl implements MaintainQueueSupport {
     @Override
     public boolean addLinkToQueueFromContainerUsingPriority(HttpFile parentFile, List<FileInfo> infoList) throws Exception {
         LOGGER.info("addLinkToQueueFromContainerUsingPriority({}, {})", parentFile, infoList);
+        return false;
+    }
+
+    @Override
+    public boolean addLinksToQueueNextTo(HttpFile parentFile, List<URI> uriList, boolean autoStart) {
+        LOGGER.info("addLinksToQueueNextTo({}, {}, {})", parentFile, uriList, autoStart);
+        return false;
+    }
+
+    @Override
+    public boolean addLinksToQueueNextTo(HttpFile parentFile, List<URI> uriList) {
+        LOGGER.info("addLinksToQueueNextTo({}, {})", parentFile, uriList);
         return false;
     }
 }

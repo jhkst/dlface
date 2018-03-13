@@ -1,7 +1,6 @@
 package cz.activecode.dl.torrentbridge;
 
 import cz.activecode.dl.ibridge.GlobalConfig;
-import cz.activecode.dl.utils.PropUtil;
 import cz.activecode.dl.utils.PropsFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

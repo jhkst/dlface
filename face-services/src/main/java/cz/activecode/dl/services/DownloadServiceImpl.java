@@ -15,6 +15,7 @@ import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +41,21 @@ public class DownloadServiceImpl implements DownloadsService {
             finished.put(downloadStatus.getDlId(), downloadStatus);
         }
     };
+
+    private PostDownloadProcess postProcess = new PostDownloadProcess() {
+
+        @Override
+        public void postProcess(Collection<File> downloadedFiles) {
+            // change ACL
+            Set<PosixFilePermission> savePermissions = globalConfig.getSavePermissions();
+            if(savePermissions != null) {
+                for (File file : downloadedFiles) {
+                    IOUtil.setFilePermission(file, savePermissions);
+                }
+            }
+        }
+    };
+
     private Map<DlId, DownloadFuture> downloadFutures = new ConcurrentHashMap<>();
 
     private BridgeService bridgeService;
@@ -99,7 +115,7 @@ public class DownloadServiceImpl implements DownloadsService {
                     addDownloadExecutorService.submit(() -> {
                         try {
                             bridge.addDownloadStatusUpdater(downloadStatusUpdateCallback);
-                            DownloadFuture downloadFuture = bridge.addDownload(url, path);
+                            DownloadFuture downloadFuture = bridge.addDownload(url, path, postProcess);
                             downloadFutures.put(downloadFuture.getDlId(), downloadFuture);
                         } catch (DownloadNotStartedException e) {
                             LOGGER.error("Error enqueuing download " + url, e);
@@ -128,7 +144,7 @@ public class DownloadServiceImpl implements DownloadsService {
                         addDownloadExecutorService.submit(() -> {
                             try {
                                 bridge.addDownloadStatusUpdater(downloadStatusUpdateCallback);
-                                DownloadFuture downloadFuture = bridge.addDownload(fileInfo, path);
+                                DownloadFuture downloadFuture = bridge.addDownload(fileInfo, path, postProcess);
                                 downloadFutures.put(downloadFuture.getDlId(), downloadFuture);
                             } catch (DownloadNotStartedException e) {
                                 LOGGER.error("Error enqueuing download " + fileInfo.getOriginalFilename(), e);

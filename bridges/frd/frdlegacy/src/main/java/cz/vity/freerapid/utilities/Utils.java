@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.util.URIUtil;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -195,7 +196,7 @@ public final class Utils {
             encoded = java.net.URLEncoder.encode(paramValue, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             encoded = "";
-            //LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
         }
         if (params.length() > 0)
             params.append('&');
@@ -225,7 +226,7 @@ public final class Utils {
                 Runtime.getRuntime().exec("attrib.exe +H " + file.getAbsolutePath());
             } catch (IOException e) {
                 logger.warning("Setting file " + file.getAbsolutePath() + " as hidden failed.");
-                //LogUtils.processException(logger, e);
+                LogUtils.processException(logger, e);
             }
         } else {
             final String s = file.getName();
@@ -253,7 +254,7 @@ public final class Utils {
                 if (inputStream != null)
                     inputStream.close();
             } catch (IOException ex) {
-//                LogUtils.processException(logger, ex);
+                LogUtils.processException(logger, ex);
             }
             logger.warning("Couldn't load properties:" + propertiesFile);
             return props;
@@ -267,7 +268,7 @@ public final class Utils {
             encoded = java.net.URLEncoder.encode(paramValue, "ISO-8859-2");
         } catch (UnsupportedEncodingException e) {
             encoded = "";
-//            LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
         }
         paramWithValue = paramName + "=" + encoded;
         return params.length() > 0 ? params + "&" + paramWithValue : paramWithValue;
@@ -308,13 +309,13 @@ public final class Utils {
                 buffer.append(lines, 0, read);
 
         } catch (IOException e) {
-//            LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
-//                    LogUtils.processException(logger, e);
+                    LogUtils.processException(logger, e);
                 }
             }
         }
@@ -330,14 +331,14 @@ public final class Utils {
         if (appPath != null)
             return appPath;
         try {
-            final URI uri = Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            final URI uri = LogUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI();
             if (!"file".equalsIgnoreCase(uri.getScheme())) {
                 logger.info("Running Webstart application");
                 return appPath = "";
             }
             appPath = new File(uri).getParent();
         } catch (URISyntaxException e) {
-//            LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
             return appPath = "";
         }
         logger.config("App Path is " + appPath);
@@ -455,6 +456,9 @@ public final class Utils {
 
             final Field isRestrictedField = jceSecurity.getDeclaredField("isRestricted");
             isRestrictedField.setAccessible(true);
+            final Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(isRestrictedField, isRestrictedField.getModifiers() & ~Modifier.FINAL);
             isRestrictedField.set(null, false);
 
             final Field defaultPolicyField = jceSecurity.getDeclaredField("defaultPolicy");
@@ -476,7 +480,10 @@ public final class Utils {
     }
 
     private static boolean isRestrictedCryptography() {
-        return "Java(TM) SE Runtime Environment".equals(System.getProperty("java.runtime.name"));
+        final String name = System.getProperty("java.runtime.name");
+        final String ver = System.getProperty("java.version");
+        return name != null && name.equals("Java(TM) SE Runtime Environment")
+                && ver != null && (ver.startsWith("1.7") || ver.startsWith("1.8"));
     }
 
 }

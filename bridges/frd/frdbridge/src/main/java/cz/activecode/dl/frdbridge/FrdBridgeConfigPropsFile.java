@@ -1,13 +1,11 @@
 package cz.activecode.dl.frdbridge;
 
 import cz.activecode.dl.ibridge.GlobalConfig;
-import cz.activecode.dl.utils.PropUtil;
 import cz.activecode.dl.utils.PropsFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Properties;
 
 public class FrdBridgeConfigPropsFile implements FrdBridgeConfig {
 
@@ -26,7 +24,8 @@ public class FrdBridgeConfigPropsFile implements FrdBridgeConfig {
 
 
     public String getPluginsPath() {
-        return propsFile.getStringProperty("bridge.frd.pluginsPath", false, System.getProperty("user.home") + "/.FRD/plugins");
+        return propsFile.getStringProperty("bridge.frd.pluginsPath", false,
+                System.getProperty("user.home") + File.separator + ".FRD" + File.separator + "plugins");
     }
 
     public void setPluginsPath(String pluginsPath) {

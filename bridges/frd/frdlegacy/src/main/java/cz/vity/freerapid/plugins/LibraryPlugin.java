@@ -16,7 +16,7 @@ public class LibraryPlugin extends Plugin {
     private final static Logger logger = Logger.getLogger(LibraryPlugin.class.getName());
 
     /**
-     * Constructor
+     * Constructor 
      */
     public LibraryPlugin() {
         super();

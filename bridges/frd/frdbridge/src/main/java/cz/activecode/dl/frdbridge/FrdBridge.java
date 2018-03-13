@@ -30,7 +30,7 @@ public class FrdBridge extends DefaultDownloadStatusUpdateObservable implements 
     private FrdPluginManager frdPluginManager;
     private GlobalConfig globalConfig;
 
-    private static AtomicInteger THREAD_CNT = new AtomicInteger();
+    private static final AtomicInteger THREAD_CNT = new AtomicInteger();
 
     private ExecutorService downloadExecutorService;
 
@@ -63,7 +63,7 @@ public class FrdBridge extends DefaultDownloadStatusUpdateObservable implements 
     }
 
     @Override
-    public DownloadFuture addDownload(String url, File saveToPath) throws DownloadNotStartedException {
+    public DownloadFuture addDownload(String url, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         LOGGER.info("adding FRD download: " + url);
         PluginDescriptor plugin;
         try {
@@ -111,6 +111,7 @@ public class FrdBridge extends DefaultDownloadStatusUpdateObservable implements 
                 FrdHttpFileDownloadTask frdHttpFileDownloadTask = new FrdHttpFileDownloadTask(this, shareDownloadService, status, downloadClient);
 
                 shareDownloadService.run(frdHttpFileDownloadTask);
+                postProcess.postProcess(status.getFiles());
             } catch (Exception e) {
                 LOGGER.error("FRD Download failed", e); //TODO: Download not started exception
             } finally {
@@ -134,7 +135,7 @@ public class FrdBridge extends DefaultDownloadStatusUpdateObservable implements 
     }
 
     @Override
-    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath) throws DownloadNotStartedException {
+    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         throw new DownloadNotStartedException(new UnsupportedOperationException("FRD does not support uploaded files"));
     }
 }

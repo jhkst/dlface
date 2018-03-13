@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>face</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <scm>
@@ -21,9 +21,8 @@
     </scm>
 
     <properties>
-        <jersey.version>1.19.3</jersey.version>
-        <tomcat.url></tomcat.url>
-        <tomcat.server></tomcat.server>
+        <tomcat.url/>
+        <tomcat.server/>
     </properties>
 
     <dependencies>
@@ -98,15 +97,27 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.1-m02</version>
+            <version>2.1</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.0-b01</version>
+            <version>4.0.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- log coloring on Windows -->
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>1.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tuxdude.logback.extensions</groupId>
+            <artifactId>logback-colorizer</artifactId>
+            <version>1.0.1</version>
         </dependency>
 
 
@@ -114,57 +125,63 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
-            <version>3.1.1-1</version><!-- don't forget to update version in index.html -->
+            <version>${jquery.version}</version>
             <scope>runtime</scope>
             <!-- version 2.x.x kept because of bootstrap 3.x.x dependency -->
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>bootstrap</artifactId>
-            <version>3.3.7-1</version><!-- don't forget to update version in index.html -->
+            <version>${bootstrap.version}</version>
             <scope>runtime</scope>
             <!-- version 4.x.x need lot of changes in javascript code -->
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>datatables</artifactId>
-            <version>1.10.13</version><!-- don't forget to update version in index.html -->
+            <version>${datatables.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>momentjs</artifactId>
-            <version>2.17.1</version><!-- don't forget to update version in index.html -->
+            <version>${momentjs.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>datatables.net-buttons</artifactId>
-            <version>1.2.4</version><!-- don't forget to update version in index.html -->
+            <version>${datatables.buttons.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>datatables.net-buttons-bs</artifactId>
-            <version>1.2.4</version><!-- don't forget to update version in index.html -->
+            <version>${datatables.buttons.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>datatables.net-select</artifactId>
-            <version>1.2.0</version><!-- don't forget to update version in index.html -->
+            <version>${datatables.select.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>datatables.net-select-bs</artifactId>
-            <version>1.2.0</version><!-- don't forget to update version in index.html -->
+            <version>${datatables.select.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>bootbox</artifactId>
-            <version>4.4.0</version><!-- don't forget to update version in index.html -->
+            <version>${bootbox.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>onsenui</artifactId>
+            <version>${onsenui.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -180,14 +197,8 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering><!-- writes properties to placeholders -->
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.html</include>
-                </includes>
+                <directory>src/main/resources</directory><!-- TODO: move to META-INF -->
+                <filtering>true</filtering>
             </resource>
         </resources>
 
@@ -216,7 +227,12 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.3.6.v20151106</version>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <httpConnector>
+                        <port>9991</port>
+                    </httpConnector>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
@@ -226,6 +242,7 @@
                     <url>${tomcat.url}</url>
                     <server>${tomcat.server}</server>
                     <path>/dlface</path>
+                    <ignorePackaging>true</ignorePackaging>
                 </configuration>
             </plugin>
             <plugin>
@@ -245,6 +262,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>make-a-war</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <archive>
                         <manifest>
@@ -253,6 +279,12 @@
                         </manifest>
                     </archive>
                     <archiveClasses>true</archiveClasses>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>

@@ -22,20 +22,29 @@ There is also a simple built-in web interface which uses this *REST api*.
 - Internet connection (surprisingly)
 
 ## Build
-To create deployable **war** do the following (where `${dlface.root}` is root of *git* clone):
+To build project do the following (where `${dlface.root}` is root of *git* clone):
 
 ```
 cd ${dlface.root}
 mvn clean install
-cd ${dlface.root}/face
-mvn war:war
 ```
 
-than you can find the war in
+than you can find deployable **war** in
 
 `${dlface.root}/face/target/face-${dlface.version}.war`
 
+and *Jetty* embedded standalone executable **jar** in
+
+`${dlface.root}/embedded/target/embedded-${dlface.version}.jar`
+
 ## Installation/deploying
+
+### Standalone *Jetty* embedded executable
+
+Simply run the following command
+```
+java -jar ${dlface.root}/embedded/target/embedded-${dlface.version}.jar
+```
 
 ### Embedded *Jetty* maven plugin
 
@@ -44,11 +53,18 @@ Simply do the following
 cd ${dlface.root}
 mvn clean install
 cd ${dlface.root}/face
-mvn jetty:run
+mvn jetty:run-exploded
 ```
-and the Jetty server will start
+and the Jetty server will start. Check logs for open port of the application.
 
 ### *Tomcat 8*
+
+#### Deploy manually
+To deploy manually into *Tomcat 8* simply copy builded **war** into
+
+`${tomcat.home}/webapps`
+
+and the server will do the (re)deploy automatically
 
 #### Deploy from Maven
 To make *Tomcat* server able to allow deploying from maven you must do following steps:
@@ -93,17 +109,10 @@ mvn install tomcat7:redeploy -Dtomcat.url=http://tomcatUrl:port/manager/text -Dt
 ```
 Mind that `tomcat7` plugin is used also for *Tomcat 8* server
 
-#### deploy manually
-To deploy manually into *Tomcat 8* simply copy builded **war** into
-
-`${tomcat.home}/webapps`
-
-and the server will do the (re)deploy automatically
-
 # Configuration
 Default config folder is located in `$HOME/.dlface`, but you can override it by setting `DLFACE_CONFIG_DIR` environment property. If this folder does not exists, it's created by application if it is possible (ACL etc.).
 
-Application then looks for `config.properties` file in this folder. If it does not exists, it's automaticaly created (check ACL) from template (with comments explaining configuration).
+Application then looks for `config.properties` file in this folder. If it does not exists, it's automatically created (check ACL) from template (with comments explaining configuration).
 
 ### Bridges configuration
 Each bridge has it's own configuration located in the same folder as main configuration.
@@ -126,7 +135,7 @@ Bridge as the name describe is a connection between the ^dlface core services an
 * **frdbridge** - this is connection to third-party plugins of [FreeRapidDownloader](http://wordrider.net/freerapid/)
      * to run this you must run *FreeRapidDownloader* itself and let it download all supported plugins (once)
      * the same applies for plugins updates (they have rules for using their repository)
-     * you can run it on different computer, then copy the `$HOME/.frd` folder into *dlface* server computer
+     * you can run it on different computer, then copy the `$HOME/.FRD` folder into *dlface* server computer
      * support them, they do great job
 * **rawbridge** - downloads file as is (usable for ftp downloads, iso images etc)
 
@@ -139,7 +148,7 @@ Bridge as the name describe is a connection between the ^dlface core services an
 * frdlegacy - GNU GPL v2. // need to separate 
 
 
-# Developers
+# For Developers
 
 ### Used technologies
 * [maven](https://maven.apache.org/)
@@ -169,7 +178,7 @@ Bridge as the name describe is a connection between the ^dlface core services an
     private static final Logger LOGGER = LoggerFactory.getLogger(MyClass.class);
  ```
  
-### Create bridge
+### Creating bridge
 To create your own download bridge you have to:
 
 * create maven module project in `bridges/${myBridge}/${myBridge}bridge`
@@ -179,3 +188,4 @@ To create your own download bridge you have to:
 * add dependency on `ibridge` module (this is the true bridge)
 * create class `extends DefaultDownloadStatusUpdateObservable implements IBridge`
 * for user actions (e.g captchas) inject `ActionHandler(Impl)`, choose one class in `dl.ibridge.action` package, create Request instance, call `actionHandler.addActionRequest()`
+* call ``postProcess.postProcess(<list of downloaded files>);`` when download is finished

@@ -26,7 +26,7 @@ public class DlId implements Serializable {
 
     /**
      * return ID value
-     * @return
+     * @return ID value
      */
     //@JsonValue
     public String getId() {

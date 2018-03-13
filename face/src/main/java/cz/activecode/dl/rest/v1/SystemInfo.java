@@ -1,5 +1,6 @@
 package cz.activecode.dl.rest.v1;
 
+import cz.activecode.dl.AppInfo;
 import cz.activecode.dl.ibridge.GlobalConfig;
 import cz.activecode.dl.to.SystemInfoData;
 import org.slf4j.Logger;
@@ -7,12 +8,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.management.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.Properties;
 
 @Path("/v1/systemInfo")
@@ -20,10 +26,10 @@ public class SystemInfo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemInfo.class);
 
-    private String appVersion;
-    private long startTime;
+
 
     private GlobalConfig globalConfig;
+    private AppInfo appInfo;
 
     private ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
     private OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
@@ -33,22 +39,9 @@ public class SystemInfo {
         this.globalConfig = globalConfig;
     }
 
-    @PostConstruct
-    public void init() {
-        startTime = System.currentTimeMillis();
-
-        InputStream versionStream = this.getClass().getResourceAsStream("/version.properties");
-        if(versionStream != null) {
-            Properties p = new Properties();
-            try {
-                p.load(versionStream);
-                String appVer = p.getProperty("appVersion");
-                String scmVer = p.getProperty("scmVersion");
-                appVersion = appVer + "-" + scmVer.substring(0, 5);
-            } catch (IOException e) {
-                LOGGER.error("Cannot load appVersion.properties", e);
-            }
-        }
+    @Autowired
+    public void setAppInfo(AppInfo appInfo) {
+        this.appInfo = appInfo;
     }
 
     /**
@@ -60,13 +53,13 @@ public class SystemInfo {
     public SystemInfoData getSystemInfo() {
         SystemInfoData sid = new SystemInfoData();
 
-        sid.setAppVersion(appVersion);
+        sid.setAppVersion(appInfo.getFullVersion());
 
         File downloadPathFile = globalConfig.getDownloadPath();
-        long freeSpace = downloadPathFile.getFreeSpace();
+        long freeSpace = downloadPathFile.getUsableSpace();
         sid.setFreeSpace(freeSpace);
 
-        sid.setUpTime(System.currentTimeMillis() - startTime);
+        sid.setUpTime(appInfo.getUpTime());
 
         sid.setLowSpace(freeSpace < globalConfig.getFreeSpaceThreshold());
 
@@ -91,13 +84,27 @@ public class SystemInfo {
         int waiting = 0;
         for(long tid : threadMXBean.getAllThreadIds()) {
             ThreadInfo threadInfo = threadMXBean.getThreadInfo(tid);
-            switch(threadInfo.getThreadState()) {
-                case BLOCKED: blocked++; break;
-                case NEW: _new++; break;
-                case RUNNABLE: runnable++; break;
-                case TERMINATED: terminated++; break;
-                case TIMED_WAITING: timedWaiting++; break;
-                case WAITING: waiting++; break;
+            if(threadInfo != null) {
+                switch (threadInfo.getThreadState()) {
+                    case BLOCKED:
+                        blocked++;
+                        break;
+                    case NEW:
+                        _new++;
+                        break;
+                    case RUNNABLE:
+                        runnable++;
+                        break;
+                    case TERMINATED:
+                        terminated++;
+                        break;
+                    case TIMED_WAITING:
+                        timedWaiting++;
+                        break;
+                    case WAITING:
+                        waiting++;
+                        break;
+                }
             }
         }
         return blocked + waiting + timedWaiting;

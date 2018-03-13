@@ -11,8 +11,9 @@
 
     <import resource="classpath*:/spring/*.xml" />
 
-    <bean name="globalConfig" class="cz.activecode.dl.GlobalConfigImpl" init-method="init">
-    </bean>
+    <bean name="appInfo" class="cz.activecode.dl.AppInfo" init-method="init"/>
+
+    <bean name="globalConfig" class="cz.activecode.dl.GlobalConfigImpl" init-method="init"/>
 
     <!-- REST -->
     <bean name="downloads" class="cz.activecode.dl.rest.v1.Downloads">
@@ -28,7 +29,8 @@
         <property name="alertMessageService" ref="alertMessageService"/>
     </bean>
 
-    <bean name="systemInfo" class="cz.activecode.dl.rest.v1.SystemInfo" init-method="init">
+    <bean name="systemInfo" class="cz.activecode.dl.rest.v1.SystemInfo">
+        <property name="appInfo" ref="appInfo"/>
         <property name="globalConfig" ref="globalConfig"/>
     </bean>
 

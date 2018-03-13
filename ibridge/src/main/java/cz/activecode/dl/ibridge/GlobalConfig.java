@@ -3,6 +3,8 @@ package cz.activecode.dl.ibridge;
 import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 
 /**
  * Global config for the application.
@@ -52,4 +54,9 @@ public interface GlobalConfig {
      * @throws IOException if folder cannot be used (cannot be created or is not a directory).
      */
     File getConfigDir() throws IOException;
+
+    /**
+     * Permissions to be set when file download is finished.
+     */
+    Set<PosixFilePermission> getSavePermissions();
 }

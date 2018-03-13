@@ -23,7 +23,6 @@ public class AppInitializer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-
     }
 
     /**

@@ -3,6 +3,7 @@ package cz.vity.freerapid.plugins.webclient.utils;
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageEncoder;
 import com.sun.media.jai.codec.PNMEncodeParam;
+import cz.vity.freerapid.utilities.LogUtils;
 import cz.vity.freerapid.utilities.Utils;
 
 import java.awt.image.BufferedImage;
@@ -83,20 +84,20 @@ class GOCR {
                 throw new IOException("Process exited abnormally");
             return s;
         } catch (Exception e) {
-//            LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
             throw new IOException(e);
         } finally {
             try {
                 out.close();
             } catch (IOException e) {
-//                LogUtils.processException(logger, e);
+                LogUtils.processException(logger, e);
             }
 
             if (scanner != null)
                 try {
                     scanner.close();
                 } catch (Exception e) {
-//                    LogUtils.processException(logger, e);
+                    LogUtils.processException(logger, e);
                 }
         }
     }

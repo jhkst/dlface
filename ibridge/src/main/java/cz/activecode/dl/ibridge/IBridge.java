@@ -62,7 +62,7 @@ public interface IBridge extends DownloadStatusUpdateObservable {
      * @return {@link DownloadFuture} to manipulate with download process.
      * @throws DownloadNotStartedException if the download does not started.
      */
-    DownloadFuture addDownload(String url, File saveToPath) throws DownloadNotStartedException;
+    DownloadFuture addDownload(String url, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException;
 
     /**
      * Adds this file to be processed by this ibridge.
@@ -72,6 +72,6 @@ public interface IBridge extends DownloadStatusUpdateObservable {
      * @return {@link DownloadFuture} to manipulate with download process.
      * @throws DownloadNotStartedException if the download does not started.
      */
-    DownloadFuture addDownload(UploadedFileInfo source, File saveToPath) throws DownloadNotStartedException;
+    DownloadFuture addDownload(UploadedFileInfo source, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException;
 
 }

@@ -68,20 +68,20 @@ public class TorrentBridge extends DefaultDownloadStatusUpdateObservable impleme
     }
 
     @Override
-    public DownloadFuture addDownload(String url, File saveToPath) throws DownloadNotStartedException {
-        return addDownload(torrentFromURL(url), saveToPath, url);
+    public DownloadFuture addDownload(String url, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
+        return addDownload(torrentFromURL(url), saveToPath, url, postProcess);
     }
 
     @Override
-    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath) throws DownloadNotStartedException {
+    public DownloadFuture addDownload(UploadedFileInfo source, File saveToPath, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         Torrent torrent = torrentFromFile(source.getLocalFile());
         if(! source.getLocalFile().delete()) {
             LOGGER.warn("Cannot remove " + source.getLocalFile());
         }
-        return addDownload(torrent, saveToPath, source.getOriginalFilename());
+        return addDownload(torrent, saveToPath, source.getOriginalFilename(), postProcess);
     }
 
-    private DownloadFuture addDownload(Torrent torrent, File saveToPath, String originalUrl) throws DownloadNotStartedException {
+    private DownloadFuture addDownload(Torrent torrent, File saveToPath, String originalUrl, PostDownloadProcess postProcess) throws DownloadNotStartedException {
         if (globalConfig.getProxy() != null) {
             throw new DownloadNotStartedException("Proxy is not supported for torrents");
         }
@@ -111,7 +111,7 @@ public class TorrentBridge extends DefaultDownloadStatusUpdateObservable impleme
 
         client.download();
 
-        TorrentStateObserver observer = new TorrentStateObserver(dlId, ds, client, this);
+        TorrentStateObserver observer = new TorrentStateObserver(dlId, ds, client, this, postProcess);
 
         client.addObserver(observer);
 

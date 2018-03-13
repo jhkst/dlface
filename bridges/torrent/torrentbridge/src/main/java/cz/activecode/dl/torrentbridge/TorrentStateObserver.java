@@ -2,10 +2,7 @@ package cz.activecode.dl.torrentbridge;
 
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.SharedTorrent;
-import cz.activecode.dl.ibridge.DlId;
-import cz.activecode.dl.ibridge.DownloadFuture;
-import cz.activecode.dl.ibridge.DownloadStatus;
-import cz.activecode.dl.ibridge.DownloadStatusUpdateObservable;
+import cz.activecode.dl.ibridge.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +21,14 @@ public class TorrentStateObserver implements Observer, DownloadFuture {
     private long lastTime;
     private Client client;
     private DownloadStatusUpdateObservable statusUpdater;
+    private PostDownloadProcess postProcess;
 
-    public TorrentStateObserver(DlId dlId, TorrentDownloadStatus torrentDownloadStatus, Client client, DownloadStatusUpdateObservable statusUpdater) {
+    public TorrentStateObserver(DlId dlId, TorrentDownloadStatus torrentDownloadStatus, Client client, DownloadStatusUpdateObservable statusUpdater, PostDownloadProcess postProcess) {
         this.dlId = dlId;
         this.torrentDownloadStatus = torrentDownloadStatus;
         this.client = client;
         this.statusUpdater = statusUpdater;
+        this.postProcess = postProcess;
         this.startTime = System.nanoTime();
         this.lastTime = System.nanoTime();
         this.lastDownloaded = 0L;
@@ -46,11 +45,13 @@ public class TorrentStateObserver implements Observer, DownloadFuture {
         long downloaded = st.getDownloaded();
 
         torrentDownloadStatus.setEstTimeNano(DownloadStatus.computeEstTime(startTime, now, downloaded, st.getLeft() + st.getDownloaded()));
-        torrentDownloadStatus.setSpeedNano((downloaded - lastDownloaded) / (double) (now - lastTime));
+        if(now - lastTime > 1_000_000_000L) {
+            torrentDownloadStatus.setSpeedNano((downloaded - lastDownloaded) / (double) (now - lastTime));
+        }
         torrentDownloadStatus.updateValues(client);
 
         if(st.isFinished() || canceled || state.equals(Client.ClientState.ERROR) || state.equals(Client.ClientState.DONE)) {
-            finishDwonload();
+            finishDownload();
             return;
         }
 
@@ -61,18 +62,19 @@ public class TorrentStateObserver implements Observer, DownloadFuture {
 
     }
 
-    private void finishDwonload() {
+    private void finishDownload() {
         canceled = true;
         torrentDownloadStatus.end();
         client.stop(false);
         client.getTorrent().stop();
         statusUpdater.finishDownloadStatusUpdaters(torrentDownloadStatus);
+        postProcess.postProcess(torrentDownloadStatus.getFiles());
     }
 
     @Override
     public void cancel() {
         LOGGER.debug("Canceling TORRENT download");
-        finishDwonload();
+        finishDownload();
     }
 
     @Override

@@ -38,6 +38,7 @@ public class FrdDownloadStatus extends DownloadStatus implements HttpFile {
 
     private long lastDownloaded;
     private long lastDownloadedTimeNano;
+    private String localPluginConfig;
 
 
     public FrdDownloadStatus(URL fileUrl, File saveToDirectory, String description) {
@@ -181,6 +182,16 @@ public class FrdDownloadStatus extends DownloadStatus implements HttpFile {
         return resumeSupported;
     }
 
+    @Override
+    public String getLocalPluginConfig() {
+        return localPluginConfig;
+    }
+
+    @Override
+    public void setLocalPluginConfig(String localPluginConfig) {
+        this.localPluginConfig = localPluginConfig;
+    }
+
     public File getOutputFile() {
         return getFile();
     }
@@ -190,10 +201,14 @@ public class FrdDownloadStatus extends DownloadStatus implements HttpFile {
         super.setProgress(realDownload * 100f/ super.getTotalSize());
 
         long currentNano = System.nanoTime();
-        super.setSpeedNano((realDownload - (double)lastDownloaded)/(currentNano - lastDownloadedTimeNano));
+        long deltaTime = currentNano - lastDownloadedTimeNano;
+        long deltaDownload = realDownload - lastDownloaded;
 
-        lastDownloaded = realDownload;
-        lastDownloadedTimeNano = currentNano;
+        if(deltaTime > 1000_000_000L) {
+            super.setSpeedNano(((double) deltaDownload) / deltaTime);
+            lastDownloaded = realDownload;
+            lastDownloadedTimeNano = currentNano;
+        }
     }
 
     private File getFile() {

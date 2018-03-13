@@ -58,7 +58,7 @@ public class FrdPluginManager {
     private GlobalConfig globalConfig;
     private FrdDialogSupportImpl frdDialogSupport;
 
-    public void init() throws IOException {
+    public void init() {
         loadAndActivatePluginsInBackground();
         queueSupport = new FrdMaintainQueueSupportImpl(); //todo: spring
         newPluginWatcherExecutor = Executors.newFixedThreadPool(1, r -> new Thread(r, "frd-new-plugin-watcher"));
@@ -67,7 +67,7 @@ public class FrdPluginManager {
             public void create(Collection<Path> path) {
                 try {
                     reloadPlugins(path.stream().map(Path::toFile).collect(Collectors.toList()));
-                } catch (MalformedURLException | JpfException | IllegalAccessException | ClassNotFoundException | InstantiationException e) {
+                } catch (JpfException e) {
                     LOGGER.warn("Cannot load frd plugin", e);
                 }
             }
@@ -81,7 +81,7 @@ public class FrdPluginManager {
             public void modify(Collection<Path> path) {
                 try {
                     reloadPlugins(path.stream().map(Path::toFile).collect(Collectors.toList()));
-                } catch (MalformedURLException | JpfException | InstantiationException | ClassNotFoundException | IllegalAccessException e) {
+                } catch (JpfException e) {
                     LOGGER.warn("Cannot reload frd plugin", e);
                 }
             }
@@ -102,7 +102,7 @@ public class FrdPluginManager {
         new Thread(() -> {
             try {
                 activatePlugins(loadPlugins(config.getPluginsPath()));
-            } catch (MalformedURLException | JpfException e) {
+            } catch (JpfException e) {
                 LOGGER.error("Cannot activate plugins", e);
             } finally {
                 markInitDone();
@@ -145,7 +145,7 @@ public class FrdPluginManager {
         this.frdDialogSupport = frdDialogSupport;
     }
 
-    public Map<String, Identity> loadPlugins(String folder) throws MalformedURLException, JpfException {
+    public Map<String, Identity> loadPlugins(String folder) throws JpfException {
         File pluginsDir = new File(folder);
         File[] plugins = pluginsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".frp"));
         if (plugins == null || plugins.length == 0) {
@@ -155,7 +155,7 @@ public class FrdPluginManager {
         return loadPlugins(Arrays.asList(plugins));
     }
 
-    public Map<String, Identity> loadPlugins(List<File> files) throws JpfException, MalformedURLException {
+    public Map<String, Identity> loadPlugins(List<File> files) throws JpfException {
         PluginManager.PluginLocation[] locations = files.stream().map(file -> {
             try {
                 StandardPluginLocation loc = new StandardPluginLocation(file, MANIFEST_PATH);
@@ -191,7 +191,7 @@ public class FrdPluginManager {
         }
     }
 
-    public void reloadPlugins(List<File> files) throws MalformedURLException, JpfException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public void reloadPlugins(List<File> files) throws JpfException{
         waitForInit();
 
         deactivatePlugins(files);
@@ -200,7 +200,7 @@ public class FrdPluginManager {
 
     }
 
-    private void activatePlugins(Map<String, Identity> pluginPub) throws JpfException, MalformedURLException {
+    private void activatePlugins(Map<String, Identity> pluginPub) {
         List<PluginDescriptor> pds = pluginPub.values().stream().map(i -> pluginManager.getRegistry().getPluginDescriptor(i.getId())).collect(Collectors.toList());
         activatePlugins(pds);
     }

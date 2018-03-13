@@ -47,10 +47,7 @@ public class FrdDialogSupportImpl implements DialogSupport {
         OKCancelActionRequestData requestData = new OKCancelActionRequestData(dialogTitle);
 
         ActionResponseData responseData = waitForResponse(requestData, Long.MAX_VALUE);
-        if(responseData instanceof OKCancelActionResponseData) {
-            return ((OKCancelActionResponseData) responseData).isConfirmed();
-        }
-        return false;
+        return responseData instanceof OKCancelActionResponseData && ((OKCancelActionResponseData) responseData).isConfirmed();
     }
 
     @Override
@@ -84,6 +81,12 @@ public class FrdDialogSupportImpl implements DialogSupport {
         if(responseData instanceof TextboxActionResponseData) {
             return ((TextboxActionResponseData) responseData).getValue();
         }
+        return null;
+    }
+
+    @Override
+    public Object getDialogLock() {
+        LOGGER.debug("getDialogLock not implemented");
         return null;
     }
 

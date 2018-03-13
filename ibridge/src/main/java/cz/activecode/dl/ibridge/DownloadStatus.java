@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -85,11 +86,11 @@ public class DownloadStatus {
     }
 
     public long getTimerStart() {
-        return timerStartNano / 1_000_000_000L;
+        return TimeUnit.NANOSECONDS.toSeconds(timerStartNano);
     }
 
     public void setTimerStart(long timerStart) {
-        this.timerStartNano = timerStart * 1_000_000_000L;
+        this.timerStartNano = TimeUnit.SECONDS.toNanos(timerStart);
     }
 
     public void setTimerStartNano(long timerStartNano) {
@@ -97,11 +98,11 @@ public class DownloadStatus {
     }
 
     public long getTimerEnd() {
-        return timerEndNano / 1_000_000_000;
+        return TimeUnit.NANOSECONDS.toSeconds(timerEndNano);
     }
 
     public void setTimerEnd(long timerEnd) {
-        this.timerEndNano = timerEnd * 1_000_000_000L;
+        this.timerEndNano = TimeUnit.SECONDS.toNanos(timerEnd);
     }
 
     public void setTimerEndNano(long timerEndNano) {
@@ -121,11 +122,11 @@ public class DownloadStatus {
     }
 
     public long getEstTime() {
-        return estTimeNano / 1_000_000_000L;
+        return TimeUnit.NANOSECONDS.toSeconds(estTimeNano);
     }
 
     public void setEstTime(long estTime) {
-        this.estTimeNano = estTime * 1_000_000_000L;
+        this.estTimeNano = TimeUnit.SECONDS.toNanos(estTime);
     }
 
     public void setEstTimeNano(long estTimeNano) {

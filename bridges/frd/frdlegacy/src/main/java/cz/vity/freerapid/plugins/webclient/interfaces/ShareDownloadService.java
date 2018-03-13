@@ -78,6 +78,14 @@ public interface ShareDownloadService {
     void showOptions() throws Exception;
 
     /**
+     * Method called from download file's plugin option, which is local,
+     * to show configurable dialog to user
+     * @param httpFile associated download file
+     * @throws Exception
+     */
+    void showLocalOptions(HttpFile httpFile) throws Exception;
+
+    /**
      * Returns instance of plugin context to allow access UI or Locale storage
      *
      * @return instance of plugin context
@@ -90,4 +98,5 @@ public interface ShareDownloadService {
      * @param pluginContext instance of plugin context
      */
     void setPluginContext(PluginContext pluginContext);
+
 }

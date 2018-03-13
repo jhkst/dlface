@@ -2,7 +2,7 @@ package cz.vity.freerapid.plugins.webclient;
 
 import cz.vity.freerapid.plugins.webclient.hoster.PremiumAccount;
 import cz.vity.freerapid.plugins.webclient.interfaces.*;
-//import cz.vity.freerapid.utilities.LogUtils;
+import cz.vity.freerapid.utilities.LogUtils;
 import org.java.plugin.Plugin;
 import org.java.plugin.PluginClassLoader;
 import org.java.plugin.registry.PluginAttribute;
@@ -10,10 +10,12 @@ import org.java.plugin.registry.PluginDescriptor;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -55,13 +57,8 @@ public abstract class AbstractFileShareService extends Plugin implements ShareDo
                     logger.warning("Icon image for plugin '" + desc.getId() + "' was not found");
                 } else {
                     try {
-                        BufferedImage bimage = ImageIO.read(resource);
-                        if(bimage == null) {
-                            logger.warning("Icon image for plugin '" + desc.getId() + "' reading failed");
-                        } else {
-                            image = new ImageIcon(bimage);
-                        }
-                    } catch (IOException e) {
+                        image = new ImageIcon(ImageIO.read(resource));
+                    } catch (Exception e) {
                         logger.warning("Icon image for plugin '" + desc.getId() + "' reading failed");
                     }
                 }
@@ -132,6 +129,12 @@ public abstract class AbstractFileShareService extends Plugin implements ShareDo
     }
 
     @Override
+    public void showLocalOptions(HttpFile httpFile) throws Exception {
+        //if it's not implemented, use the global one (showOptions)
+        showOptions();
+    }
+
+    @Override
     public PluginContext getPluginContext() {
         return pluginContext;
     }
@@ -159,7 +162,7 @@ public abstract class AbstractFileShareService extends Plugin implements ShareDo
                 return pa;//return new username/password
             }
         } catch (Exception e) {
-//            LogUtils.processException(logger, e);
+            LogUtils.processException(logger, e);
         }
         return account;
     }
@@ -188,7 +191,7 @@ public abstract class AbstractFileShareService extends Plugin implements ShareDo
             try {
                 return getPluginContext().getConfigurationStorageSupport().loadConfigFromFile(pluginConfigFile, PremiumAccount.class);
             } catch (Exception e) {
-//                LogUtils.processException(logger, e);
+                LogUtils.processException(logger, e);
                 return new PremiumAccount();
             }
         } else {
@@ -204,4 +207,107 @@ public abstract class AbstractFileShareService extends Plugin implements ShareDo
      * @return instance of PluginRunner
      */
     protected abstract PluginRunner getPluginRunnerInstance();
+
+    /**
+     * Load configuration data from string into Object.
+     * Internal implementation uses XMLEncoder.
+     *
+     * @param content config content
+     * @param type    class of the stored object
+     * @return returns new instance, null if
+     * @throws Exception throwed when reading went wrong
+     */
+    @SuppressWarnings("unchecked")
+    public <E> E loadConfigFromString(String content, Class<E> type) throws Exception {
+        XMLDecoder xmlDecoder = null;
+        try {
+            xmlDecoder = new XMLDecoder(new ByteArrayInputStream(content.getBytes()), null, null, type.getClassLoader());
+            return (E) xmlDecoder.readObject();
+        } catch (RuntimeException e) {
+            LogUtils.processException(logger, e);
+            throw new Exception(e);
+        } catch (Exception e) {
+            LogUtils.processException(logger, e);
+            throw e;
+        } finally {
+            if (xmlDecoder != null) {
+                try {
+                    xmlDecoder.close();
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Convert plugin's configuration data from Object into string.
+     * Internal implementation uses XMLEncoder.
+     *
+     * @return config data as string
+     * @throws Exception throwed when reading went wrong
+     */
+    public String convertConfigToString(Object object) throws Exception {
+        XMLEncoder xmlEncoder = null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            xmlEncoder = new XMLEncoder(baos);
+            xmlEncoder.writeObject(object);
+        } catch (Exception e) {
+            LogUtils.processException(logger, e);
+            throw e;
+        } finally {
+            if (xmlEncoder != null) {
+                try {
+                    xmlEncoder.close();
+                } catch (Exception e) {
+                    LogUtils.processException(logger, e);
+                }
+            }
+        }
+        String result = new String(baos.toByteArray());
+        try {
+            baos.close();
+        } catch (IOException e) {
+            LogUtils.processException(logger, e);
+        }
+        return result;
+    }
+
+    /**
+     * Clone config using XMLEncoder and XMLDecoder
+     *
+     * @param config config to be cloned
+     * @param type   class of the stored object
+     * @return config clone
+     * @throws Exception if there's something wrong
+     */
+    public <E> E cloneConfig(E config, Class<E> type) throws Exception {
+        String configAsString = convertConfigToString(config);
+        return loadConfigFromString(configAsString, type);
+    }
+
+    /**
+     * Get local config from file item, if it's none then clone the global config
+     *
+     * @param httpFile               file item
+     * @param globalConfigToBeCloned global config to be cloned
+     * @param type                   global config class type
+     * @return local config
+     * @throws Exception if there's something wrong
+     */
+    public <E> E getLocalConfig(HttpFile httpFile, E globalConfigToBeCloned, Class<E> type) throws Exception {
+        E result;
+        String configAsString = httpFile.getLocalPluginConfig();
+        if (configAsString == null) {
+            result = cloneConfig(globalConfigToBeCloned, type);
+        } else {
+            try {
+                result = loadConfigFromString(configAsString, type);
+            } catch (Exception e) {
+                result = cloneConfig(globalConfigToBeCloned, type);
+            }
+        }
+        return result;
+    }
 }

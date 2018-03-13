@@ -23,14 +23,14 @@ public class Util {
 
     private final static Pattern fileNamePattern = Pattern.compile("/([^/]*?(\\.|-)(zip|rar|avi|wmv|mp\\d?|srt|sub|apk))\\.html?", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
     private final static Pattern encodedPattern = Pattern.compile("%[A-Z0-9]{2}%");
-    private final static Pattern fileExtensionPattern = Pattern.compile("[\\.\\-_]([a-z\\d]+?)$");
+    private final static Pattern fileExtensionPattern = Pattern.compile("[.\\-_]([a-z\\d]+?)$");
     private static final int DOWNLOAD_BUFFER = 16 * 1024;
 
     //TODO: improve this
     private static final Pattern URL_PATTERN = Pattern.compile(
             "(?:^|[\\W])((ht|f)tp(s?)://|www\\.)"
                     + "(([\\w\\-]+\\.)+?([\\w\\-.~]+/?)*"
-                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]*$~@!:/{};']*)",
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
     private static final Pattern SIZE_PATTERN = Pattern.compile("([\\d.]+)(([KMGT]?)(i?))?B?", Pattern.CASE_INSENSITIVE);
@@ -196,4 +196,42 @@ public class Util {
 
     }
 
+    public static String propValueEscape(String value) {
+        StringBuilder outBuffer = new StringBuilder();
+        for(int x=0; x<value.length(); x++) {
+            char ch = value.charAt(x);
+            if ((ch > 61) && (ch < 127)) {
+                if (ch == '\\') {
+                    outBuffer.append('\\'); outBuffer.append('\\');
+                    continue;
+                }
+                outBuffer.append(ch);
+                continue;
+            }
+            switch(ch) {
+                case ' ':
+                    if (x == 0)
+                        outBuffer.append('\\');
+                    outBuffer.append(' ');
+                    break;
+                case '\t':outBuffer.append('\\'); outBuffer.append('t');
+                    break;
+                case '\n':outBuffer.append('\\'); outBuffer.append('n');
+                    break;
+                case '\r':outBuffer.append('\\'); outBuffer.append('r');
+                    break;
+                case '\f':outBuffer.append('\\'); outBuffer.append('f');
+                    break;
+                case '=':
+                case ':':
+                case '#':
+                case '!':
+                    outBuffer.append('\\'); outBuffer.append(ch);
+                    break;
+                default:
+                    outBuffer.append(ch);
+            }
+        }
+        return outBuffer.toString();
+    }
 }

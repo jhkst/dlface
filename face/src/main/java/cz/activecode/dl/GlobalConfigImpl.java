@@ -4,6 +4,7 @@ import cz.activecode.dl.ibridge.GlobalConfig;
 import cz.activecode.dl.utils.Util;
 import cz.activecode.dl.utils.PropUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Implementation of global config
@@ -31,6 +35,7 @@ public class GlobalConfigImpl implements GlobalConfig {
     private long freeSpaceThreshold;
     private String[] bridgesOrder = {};
     private File archiveLinksFile;
+    private Set<PosixFilePermission> savePermissions;
 
     /**
      * Bean initialization (see spring context).
@@ -66,9 +71,8 @@ public class GlobalConfigImpl implements GlobalConfig {
 
     /**
      *
-     * @param cfgPath
-     * @return
-     * @throws IOException
+     * @param cfgPath path to folder of config.properties
+     * @return The config.properties file itself. If it does not exists it creates new one from template
      */
     private File getConfigFile(File cfgPath) throws IOException {
         if(cfgPath == null) {
@@ -78,9 +82,15 @@ public class GlobalConfigImpl implements GlobalConfig {
         File configFile = new File(cfgPath, "config.properties");
 
         if(!configFile.exists()) {
-            InputStream template = GlobalConfigImpl.class.getResourceAsStream("config.properties.template");
-            try {
-                FileUtils.copyInputStreamToFile(template, configFile);
+            LOGGER.info("Temp dir: " + System.getProperty("java.io.tmpdir"));
+            String tmpDir = Util.propValueEscape(System.getProperty("java.io.tmpdir"));
+            String encoding = "UTF-8";
+            try(InputStream template = GlobalConfigImpl.class.getResourceAsStream("config.properties.template")) {
+                String content = IOUtils.toString(template, encoding);
+
+                content = content.replace("###TMPDIR###", tmpDir);
+                content = content.replace("\n", System.getProperty("line.separator"));
+                FileUtils.writeStringToFile(configFile, content, encoding);
             } catch (IOException e) {
                 LOGGER.error("Cannot create config file " + configFile, e);
                 throw e;
@@ -130,6 +140,7 @@ public class GlobalConfigImpl implements GlobalConfig {
         updateProxy(props.getProperty("dlface.connection.proxyHost"), PropUtil.getIntProperty(props, "dlface.connection.proxyPort", 80));
         updateBridgesOrder(PropUtil.getStringProperty(props, "dlface.bridges.order", true, "frdBridge,torrentBridge,rawBridge").split(","));
         updateArchiveLinksFile(PropUtil.getStringProperty(props, "dlface.archiveLinksFile", false, null), new File(this.downloadPath, "links.txt"));
+        updateSavePermissions(PropUtil.getStringProperty(props, "dlface.downloads.savePermissions", true, null), null);
     }
 
     private void updateDownloadPath(String downloadPath) {
@@ -157,6 +168,19 @@ public class GlobalConfigImpl implements GlobalConfig {
 
     private void updateArchiveLinksFile(String filePath, File defaultFile) {
         this.archiveLinksFile = filePath == null ? defaultFile : new File(filePath);
+    }
+
+    private void updateSavePermissions(String savePermissions, Set<PosixFilePermission> defaultValue) {
+        this.savePermissions = defaultValue;
+        try {
+            if(savePermissions != null) {
+                this.savePermissions = PosixFilePermissions.fromString(savePermissions);
+            }
+        } catch (IllegalArgumentException e) {
+            if (savePermissions.trim().length() != 0) {
+                LOGGER.warn("Cannot recognize file permissions: {}", savePermissions);
+            }
+        }
     }
 
     /**
@@ -198,4 +222,13 @@ public class GlobalConfigImpl implements GlobalConfig {
     public File getArchiveLinksFile() {
         return archiveLinksFile;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<PosixFilePermission> getSavePermissions() {
+        return savePermissions;
+    }
+
 }
