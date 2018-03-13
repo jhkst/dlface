@@ -96,7 +96,7 @@ var DL = {
                 "name": data.name,
                 "startTime": data.startTime ? Util.toLocalTimezone(data.startTime) : "N/A",
                 "endTime": data.endTime ? Util.toLocalTimezone(data.endTime) : "N/A",
-                "size": Util.bytesToH(data.totalSize, 1, false, 'B', '&nbsp;'),
+                "size": Util.bytesToH(data.downloadedSize, 1, false, 'B', '&nbsp;'),
                 "_data": data
             };
 

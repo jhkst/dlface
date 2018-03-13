@@ -131,10 +131,10 @@ public class RawBridge extends DefaultDownloadStatusUpdateObservable implements 
                     downloadStatus.setEstTimeNano(DownloadStatus.computeEstTime(timerStart, now, downloadedBytes, contentLength));
                     if(now - lastTime > 1_000_000_000L) {
                         downloadStatus.setSpeedNano(curDow / (double) (now - lastTime));
+                        lastTime = now;
                     }
                     downloadStatus.setProgress(downloadedBytes * 100f / contentLength);
                     RawBridge.this.notifyDownloadStatusUpdaters(downloadStatus);
-                    lastTime = now;
                 }
                 downloadStatus.end();
                 postProcess.postProcess(downloadStatus.getFiles());

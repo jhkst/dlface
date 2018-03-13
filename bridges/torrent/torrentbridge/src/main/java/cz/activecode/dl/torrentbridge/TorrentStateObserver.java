@@ -47,6 +47,7 @@ public class TorrentStateObserver implements Observer, DownloadFuture {
         torrentDownloadStatus.setEstTimeNano(DownloadStatus.computeEstTime(startTime, now, downloaded, st.getLeft() + st.getDownloaded()));
         if(now - lastTime > 1_000_000_000L) {
             torrentDownloadStatus.setSpeedNano((downloaded - lastDownloaded) / (double) (now - lastTime));
+            lastTime = now;
         }
         torrentDownloadStatus.updateValues(client);
 
@@ -58,7 +59,6 @@ public class TorrentStateObserver implements Observer, DownloadFuture {
         statusUpdater.notifyDownloadStatusUpdaters(torrentDownloadStatus);
 
         lastDownloaded = downloaded;
-        lastTime = now;
 
     }
 
